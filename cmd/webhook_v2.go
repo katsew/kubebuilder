@@ -70,13 +70,23 @@ func newWebhookV2Cmd() *cobra.Command {
 			}
 
 			fmt.Println("Writing scaffold for you to edit...")
-			fmt.Println(filepath.Join("api", o.res.Version,
-				fmt.Sprintf("%s_webhook.go", strings.ToLower(o.res.Kind))))
+			var webhookFilePath string
+			webhookFileName := fmt.Sprintf("%s_webhook.go", strings.ToLower(o.res.Kind))
+			if projectInfo.MultiGroup {
+				webhookFilePath = filepath.Join("apis", o.res.Group, o.res.Version, webhookFileName)
+			} else {
+				webhookFilePath = filepath.Join("api", o.res.Version, webhookFileName)
+			}
+			fmt.Println(webhookFilePath)
 			if o.conversion {
 				fmt.Println(`Webhook server has been set up for you.
 You need to implement the conversion.Hub and conversion.Convertible interfaces for your CRD types.`)
 			}
 			webhookScaffolder := &webhook.Webhook{
+				Input: input.Input{
+					MultiGroup: projectInfo.MultiGroup,
+					Path: webhookFilePath,
+				},
 				Resource:   o.res,
 				Defaulting: o.defaulting,
 				Validating: o.validation,

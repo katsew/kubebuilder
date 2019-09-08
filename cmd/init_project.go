@@ -108,6 +108,7 @@ func (o *projectOptions) bindCmdlineFlags(cmd *cobra.Command) {
 		"defaults to the go package of the current working directory.")
 	cmd.Flags().StringVar(&o.project.Domain, "domain", "my.domain", "domain for groups")
 	cmd.Flags().StringVar(&o.project.Version, "project-version", project.Version2, "project version")
+	cmd.Flags().BoolVar(&o.project.MultiGroup, "multi-group", false, "flag to enable a multiple group support")
 }
 
 func (o *projectOptions) initializeProject() {

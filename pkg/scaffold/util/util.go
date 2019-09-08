@@ -54,7 +54,13 @@ func GetResourceInfo(r *resource.Resource, in input.Input) (resourcePackage, gro
 		"setting":               "k8s.io",
 		"storage":               "k8s.io",
 	}
-	resourcePath := filepath.Join("api", r.Version, fmt.Sprintf("%s_types.go", strings.ToLower(r.Kind)))
+	var resourcePath string
+	resourceTypesFilePath := fmt.Sprintf("%s_types.go", strings.ToLower(r.Kind))
+	if in.MultiGroup {
+		resourcePath = filepath.Join("apis", r.Group, r.Version, resourceTypesFilePath)
+	} else {
+		resourcePath = filepath.Join("api", r.Version, resourceTypesFilePath)
+	}
 	if _, err := os.Stat(resourcePath); os.IsNotExist(err) {
 		if domain, found := coreGroups[r.Group]; found {
 			// TODO: support apiextensions.k8s.io and metrics.k8s.io.
@@ -69,5 +75,9 @@ func GetResourceInfo(r *resource.Resource, in input.Input) (resourcePackage, gro
 		}
 		// TODO: need to support '--resource-pkg-path' flag for specifying resourcePath
 	}
-	return path.Join(in.Repo, "api"), r.Group + "." + in.Domain
+	if in.MultiGroup {
+		return path.Join(in.Repo, "apis"), r.Group + "." + in.Domain
+	} else {
+		return path.Join(in.Repo, "api"), r.Group + "." + in.Domain
+	}
 }

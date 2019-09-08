@@ -1,6 +1,7 @@
 version: "2"
 domain: testproject.org
 repo: sigs.k8s.io/kubebuilder/testdata/project-v2
+multigroup: false
 resources:
 - group: crew
   version: v1

@@ -138,8 +138,14 @@ func (a *ControllerSuiteTest) Update() error {
 
 	ctrlImportCodeFragment := fmt.Sprintf(`"%s/controllers"
 `, a.Repo)
-	apiImportCodeFragment := fmt.Sprintf(`%s%s "%s/%s"
+	var apiImportCodeFragment string
+	if a.MultiGroup {
+		apiImportCodeFragment = fmt.Sprintf(`%s%s "%s/%s/%s"
+`, a.Resource.Group, a.Resource.Version, a.ResourcePackage, a.Resource.Group, a.Resource.Version)
+	} else {
+		apiImportCodeFragment = fmt.Sprintf(`%s%s "%s/%s"
 `, a.Resource.Group, a.Resource.Version, a.ResourcePackage, a.Resource.Version)
+	}
 
 	addschemeCodeFragment := fmt.Sprintf(`err = %s%s.AddToScheme(scheme.Scheme)
 Expect(err).NotTo(HaveOccurred())

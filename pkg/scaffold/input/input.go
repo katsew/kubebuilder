@@ -58,6 +58,9 @@ type Input struct {
 
 	// ProjectPath is the relative path to the project root
 	ProjectPath string
+
+	// MultiGroup is a flag to support multiple api groups
+	MultiGroup bool
 }
 
 // Domain allows a domain to be set on an object
@@ -169,6 +172,9 @@ type ProjectFile struct {
 
 	// Repo is the go package name of the project root
 	Repo string `yaml:"repo,omitempty"`
+
+	// MultiGroup is a flag to support multiple api groups
+	MultiGroup bool `yaml:"multigroup,omitempty"`
 
 	// Resources tracks scaffolded resources in the project. This info is
 	// tracked only in project with version 2.

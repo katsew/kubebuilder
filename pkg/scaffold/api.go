@@ -146,18 +146,28 @@ func (api *API) scaffoldV2() error {
 		if err := api.validateResourceGroup(r); err != nil {
 			return err
 		}
-
-		fmt.Println(filepath.Join("api", r.Version,
-			fmt.Sprintf("%s_types.go", strings.ToLower(r.Kind))))
+		var resourceDir string
+		if api.project.MultiGroup {
+			resourceDir = filepath.Join("apis", r.Group, r.Version)
+		} else {
+			resourceDir = filepath.Join("api", r.Version)
+		}
+		resourceTypesFilePath := filepath.Join(resourceDir, fmt.Sprintf("%s_types.go", strings.ToLower(r.Kind)))
+		resourceGroupVersionFilePath := filepath.Join(resourceDir, "groupversion_info.go")
+		fmt.Println(resourceTypesFilePath)
 
 		err := (&Scaffold{}).Execute(
 			input.Options{},
 			&resourcev2.Types{
 				Input: input.Input{
-					Path: filepath.Join("api", r.Version, fmt.Sprintf("%s_types.go", strings.ToLower(r.Kind))),
+					Path: resourceTypesFilePath,
 				},
 				Resource: r},
-			&resourcev2.Group{Resource: r},
+			&resourcev2.Group{
+				Input: input.Input{
+					Path: resourceGroupVersionFilePath,
+				},
+				Resource: r},
 			&resourcev2.CRDSample{Resource: r},
 			&crdv2.EnableWebhookPatch{Resource: r},
 			&crdv2.EnableCAInjectionPatch{Resource: r},
@@ -200,8 +210,18 @@ func (api *API) scaffoldV2() error {
 	if api.DoController {
 		fmt.Println(filepath.Join("controllers", fmt.Sprintf("%s_controller.go", strings.ToLower(r.Kind))))
 
-		ctrlScaffolder := &resourcev2.Controller{Resource: r}
-		testsuiteScaffolder := &resourcev2.ControllerSuiteTest{Resource: r}
+		ctrlScaffolder := &resourcev2.Controller{
+			Input: input.Input{
+				MultiGroup: api.project.MultiGroup,
+			},
+			Resource: r,
+		}
+		testsuiteScaffolder := &resourcev2.ControllerSuiteTest{
+			Input: input.Input{
+				MultiGroup: api.project.MultiGroup,
+			},
+			Resource: r,
+		}
 		err := (&Scaffold{}).Execute(
 			input.Options{},
 			testsuiteScaffolder,
@@ -235,8 +255,10 @@ func (api *API) scaffoldV2() error {
 // being created belongs to existing group.
 func (api *API) validateResourceGroup(resource *resourcev1.Resource) error {
 	for _, existingGroup := range api.project.ResourceGroups() {
-		if strings.ToLower(resource.Group) != strings.ToLower(existingGroup) {
-			return fmt.Errorf("Group '%s' is not same as existing group '%s'. Multiple groups are not supported yet.", resource.Group, existingGroup)
+		if strings.ToLower(resource.Group) != strings.ToLower(existingGroup) && !api.project.MultiGroup {
+			return fmt.Errorf(`set multigroup:true into PROJECT and migrate existing groups.
+see: https://book.kubebuilder.io/migration/multi-group.html
+`)
 		}
 	}
 	return nil

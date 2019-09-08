@@ -73,7 +73,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/go-logr/logr"
 
+	{{- if .MultiGroup }}
+	{{ .Resource.Group}}{{ .Resource.Version }} "{{ .ResourcePackage }}/{{ .Resource.Group }}/{{ .Resource.Version }}"
+	{{- else }}
 	{{ .Resource.Group}}{{ .Resource.Version }} "{{ .ResourcePackage }}/{{ .Resource.Version }}"
+	{{- end }}
 )
 
 // {{ .Resource.Kind }}Reconciler reconciles a {{ .Resource.Kind }} object

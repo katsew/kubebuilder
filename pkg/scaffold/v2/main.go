@@ -54,13 +54,21 @@ func (m *Main) Update(opts *MainUpdateOptions) error {
 	path := "main.go"
 
 	resPkg, _ := util.GetResourceInfo(opts.Resource, input.Input{
-		Domain: opts.Project.Domain,
-		Repo:   opts.Project.Repo,
+		Domain:     opts.Project.Domain,
+		Repo:       opts.Project.Repo,
+		MultiGroup: opts.Project.MultiGroup,
 	})
 
 	// generate all the code fragments
-	apiImportCodeFragment := fmt.Sprintf(`%s%s "%s/%s"
+	var apiImportCodeFragment string
+	if opts.Project.MultiGroup {
+		apiImportCodeFragment = fmt.Sprintf(`%s%s "%s/%s/%s"
+`, opts.Resource.Group, opts.Resource.Version, resPkg, opts.Resource.Group, opts.Resource.Version)
+	} else {
+		apiImportCodeFragment = fmt.Sprintf(`%s%s "%s/%s"
 `, opts.Resource.Group, opts.Resource.Version, resPkg, opts.Resource.Version)
+	}
+
 	ctrlImportCodeFragment := fmt.Sprintf(`"%s/controllers"
 `, opts.Project.Repo)
 	addschemeCodeFragment := fmt.Sprintf(`_ = %s%s.AddToScheme(scheme)

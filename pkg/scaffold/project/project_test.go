@@ -303,6 +303,7 @@ Copyright %s Example Owners.
 				instance.Version = "1"
 				instance.Domain = "testproject.org"
 				instance.Repo = "project"
+				instance.MultiGroup = false
 				Expect(s.Execute(input.Options{}, instance)).NotTo(HaveOccurred())
 
 				// Verify the contents matches the golden file.
